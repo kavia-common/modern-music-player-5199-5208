@@ -1,49 +1,44 @@
-import React, { useState, useEffect } from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React from "react";
+import "./App.css";
+import Header from "./components/Header";
+import Sidebar from "./components/Sidebar";
+import SongList from "./components/SongList";
+import PlaylistView from "./components/PlaylistView";
+import NowPlayingBar from "./components/NowPlayingBar";
+import { PlayerProvider } from "./context/PlayerContext";
+import { LibraryProvider, useLibrary } from "./context/LibraryContext";
 
-// PUBLIC_INTERFACE
-function App() {
-  const [theme, setTheme] = useState('light');
-
-  // Effect to apply theme to document element
-  useEffect(() => {
-    document.documentElement.setAttribute('data-theme', theme);
-  }, [theme]);
-
-  // PUBLIC_INTERFACE
-  const toggleTheme = () => {
-    setTheme(prevTheme => prevTheme === 'light' ? 'dark' : 'light');
-  };
-
+function MainArea() {
+  const { activeView } = useLibrary();
   return (
-    <div className="App">
-      <header className="App-header">
-        <button 
-          className="theme-toggle" 
-          onClick={toggleTheme}
-          aria-label={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
-        >
-          {theme === 'light' ? '🌙 Dark' : '☀️ Light'}
-        </button>
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <p>
-          Current theme: <strong>{theme}</strong>
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <main className="main-area">
+      {activeView === "library" && <SongList />}
+      {activeView === "playlists" && (
+        <div className="placeholder">
+          <h2>Your Playlists</h2>
+          <p className="muted">Select a playlist from the sidebar or create a new one.</p>
+        </div>
+      )}
+      {activeView === "playlist" && <PlaylistView />}
+    </main>
   );
 }
 
-export default App;
+// PUBLIC_INTERFACE
+export default function App() {
+  /** Root application component setting up contexts and the UI layout. */
+  return (
+    <LibraryProvider>
+      <PlayerProvider>
+        <div className="app-shell" data-theme="light">
+          <Header />
+          <div className="content">
+            <Sidebar />
+            <MainArea />
+          </div>
+          <NowPlayingBar />
+        </div>
+      </PlayerProvider>
+    </LibraryProvider>
+  );
+}
